@@ -1,4 +1,4 @@
-import { CircleDot, CircleAlert, CircleCheck, CircleHelp, Scale } from "lucide-react";
+import { CircleDot, CircleAlert, CircleCheck, ThumbsUp, Scale } from "lucide-react";
 import type { DecisionStatus } from "@/domain/decision";
 import { Badge } from "@/components/ui/Primitives";
 
@@ -21,7 +21,7 @@ const TONE: Record<DecisionStatus, "neutral" | "brand" | "warning" | "danger" | 
 const ICON: Record<DecisionStatus, typeof CircleDot> = {
   open: CircleDot,
   blocked: Scale,
-  ready_to_confirm: CircleHelp,
+  ready_to_confirm: ThumbsUp,
   confirmed: CircleCheck,
   needs_review: CircleAlert,
 };

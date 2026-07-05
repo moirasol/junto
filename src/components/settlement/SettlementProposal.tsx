@@ -152,30 +152,8 @@ export function SettlementProposal({ trip }: { trip: TripOutput }) {
 
       {settlement.status === "suggested" || settlement.status === "adjusted" ? (
         <div className="space-y-3 border-t border-neutral-100 pt-3">
-          {settlement.status === "suggested" && !editing && (
-            <Button variant="secondary" onClick={handleReject}>
-              El grupo no está de acuerdo
-            </Button>
-          )}
-          {editing ? (
-            <div className="flex gap-2">
-              <Button onClick={() => handleSaveAdjustments(false)}>Guardar ajustes</Button>
-              <Button variant="secondary" onClick={() => setEditing(false)}>
-                Cancelar
-              </Button>
-            </div>
-          ) : (
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setDraftTransfers(settlement.suggestedTransfers);
-                setEditing(true);
-              }}
-            >
-              Ajustar transferencias
-            </Button>
-          )}
-
+          {/* Acción primaria: aceptar la liquidación es lo que se espera hacer
+              la mayoría de las veces, así que va primero y con más peso visual. */}
           <div className="space-y-2 rounded-xl bg-brand-50 p-3">
             <label className="flex items-center gap-2 text-sm text-neutral-700">
               <input
@@ -192,6 +170,35 @@ export function SettlementProposal({ trip }: { trip: TripOutput }) {
               Aceptar liquidación
             </Button>
           </div>
+
+          {/* Acciones alternativas: menos peso visual, para no competir con la primaria. */}
+          {editing ? (
+            <div className="flex gap-2">
+              <Button variant="secondary" onClick={() => handleSaveAdjustments(false)}>
+                Guardar ajustes
+              </Button>
+              <Button variant="ghost" onClick={() => setEditing(false)}>
+                Cancelar
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-4">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setDraftTransfers(settlement.suggestedTransfers);
+                  setEditing(true);
+                }}
+              >
+                Ajustar transferencias
+              </Button>
+              {settlement.status === "suggested" && (
+                <Button variant="ghost" onClick={handleReject}>
+                  El grupo no está de acuerdo
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       ) : settlement.status === "accepted" ? (
         <div className="space-y-2 rounded-xl bg-brand-50 p-3">
