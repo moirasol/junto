@@ -5,6 +5,7 @@ import type {
   DecisionOutput,
   VoteInput,
 } from "@/domain/decision";
+import { getDecisionDisplayTitle, hasSimpleMajority } from "@/domain/decision";
 import type { TripOutput } from "@/domain/trip";
 import { generateId } from "@/lib/ids";
 import { nowIso } from "@/lib/dates";
@@ -52,21 +53,19 @@ function recomputeDecision(decision: DecisionOutput, trip: TripOutput): Decision
     participationRate: accepted.length === 0 ? 0 : votedParticipantIds.size / accepted.length,
   };
 
-  // TODO (spec §8): la regla exacta de mayoría/consenso no está definida
-  // (mayoría simple, unanimidad, % configurable o cantidad mínima fija).
-  // Se asume: si no se definió minimumParticipation, se requiere que hayan
-  // votado todos los participantes aceptados.
-  const effectiveMinimum = decision.minimumParticipation ?? accepted.length;
-
+  // Spec 4.3.9-12 / 7.8 — mayoría simple: una opción cierra la decisión
+  // cuando supera el 50% de los votos ya emitidos (no del total de
+  // aceptados). minimumParticipation queda en el input por compatibilidad
+  // pero la regla de status no lo usa.
   let status = decision.status;
   if (status !== "confirmed" && status !== "needs_review") {
     const hasTie = topOptions.length > 1;
-    const reachedMinimum = participation.votedParticipants >= effectiveMinimum;
+    const topHasMajority = maxVotes > 0 && hasSimpleMajority(maxVotes, decision.votes.length);
 
     if (hasTie) {
       // Spec 5.2 — empate: marcar blocked, no elegir automáticamente.
       status = "blocked";
-    } else if (reachedMinimum && maxVotes > 0) {
+    } else if (topHasMajority) {
       status = "ready_to_confirm";
     } else {
       status = "open";
@@ -161,7 +160,7 @@ export function createDecision(input: CreateDecisionInput): ServiceResult<Decisi
     id: generateId("decision"),
     tripId: input.tripId,
     type: input.type,
-    title: input.title,
+    displayTitle: getDecisionDisplayTitle(input.type),
     ...(input.description ? { description: input.description } : {}),
     status: "open",
     options: input.options.map((option) => ({

@@ -3,12 +3,6 @@ import { checkCoordinationConcentration } from "@/services/decisionService";
 import { Badge, Card } from "@/components/ui/Primitives";
 import { DecisionStatusBadge } from "@/components/decisions/DecisionStatusBadge";
 
-const TYPE_LABEL: Record<string, string> = {
-  dates: "Fechas",
-  accommodation: "Alojamiento",
-  transport: "Transporte",
-};
-
 export function NextActionPanel({ trip }: { trip: TripOutput }) {
   const pending = trip.decisions.filter((d) => d.status !== "confirmed");
   const resolved = trip.decisions.filter((d) => d.status === "confirmed");
@@ -38,9 +32,7 @@ export function NextActionPanel({ trip }: { trip: TripOutput }) {
               <ul className="mt-2 space-y-2">
                 {pending.map((decision) => (
                   <li key={decision.id} className="flex items-center justify-between gap-2 text-sm">
-                    <span>
-                      {TYPE_LABEL[decision.type]}: {decision.title}
-                    </span>
+                    <span>{decision.displayTitle}</span>
                     <DecisionStatusBadge status={decision.status} />
                   </li>
                 ))}
@@ -58,7 +50,7 @@ export function NextActionPanel({ trip }: { trip: TripOutput }) {
                   const selected = decision.options.find((o) => o.id === decision.selectedOptionId);
                   return (
                     <li key={decision.id}>
-                      {TYPE_LABEL[decision.type]}: {selected?.label ?? decision.title}
+                      {decision.displayTitle}: {selected?.label ?? "—"}
                     </li>
                   );
                 })}

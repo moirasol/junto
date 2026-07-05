@@ -21,7 +21,6 @@ export default function DecisionsPage() {
   const trip = useTrip(tripId);
 
   const [type, setType] = useState<DecisionType>("dates");
-  const [title, setTitle] = useState("");
   const [optionLabels, setOptionLabels] = useState(["", ""]);
   const [error, setError] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -49,7 +48,6 @@ export default function DecisionsPage() {
       tripId,
       createdByUserId: getActingUserId(tripId),
       type,
-      title: title.trim(),
       options,
     });
 
@@ -58,7 +56,6 @@ export default function DecisionsPage() {
       return;
     }
 
-    setTitle("");
     setOptionLabels(["", ""]);
     setFormOpen(false);
   }
@@ -89,15 +86,6 @@ export default function DecisionsPage() {
                   </option>
                 ))}
               </select>
-            </div>
-            <div>
-              <FieldLabel htmlFor="decision-title">Título</FieldLabel>
-              <TextInput
-                id="decision-title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Elegir fecha del viaje"
-              />
             </div>
             <div className="space-y-2">
               <FieldLabel>Opciones</FieldLabel>

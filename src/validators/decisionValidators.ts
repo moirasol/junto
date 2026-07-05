@@ -12,7 +12,6 @@ const VALID_TYPES = ["dates", "accommodation", "transport"];
 export function validateCreateDecisionInput(input: CreateDecisionInput): string[] {
   const errors: string[] = [];
 
-  if (!input.title?.trim()) errors.push("Poné un título para la decisión.");
   if (!VALID_TYPES.includes(input.type)) errors.push("El tipo de decisión no es válido.");
   if (!input.options || input.options.length < 2) {
     errors.push("Agregá al menos dos opciones.");
@@ -38,8 +37,11 @@ export function validateVoteInput(
   }
   if (!input.participantId?.trim()) errors.push("Falta indicar quién vota.");
 
-  const belongsToTrip = participants.some((p) => p.id === input.participantId);
-  if (!belongsToTrip) errors.push("Ese participante no pertenece a este viaje.");
+  const votingParticipant = participants.find((p) => p.id === input.participantId);
+  if (!votingParticipant) errors.push("Ese participante no pertenece a este viaje.");
+  else if (votingParticipant.status !== "accepted") {
+    errors.push("Sólo pueden votar los integrantes que confirmaron que van.");
+  }
 
   const optionExists = decision.options.some((o) => o.id === input.optionId);
   if (!optionExists) errors.push("Esa opción no existe en esta decisión.");

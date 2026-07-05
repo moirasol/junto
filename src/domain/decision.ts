@@ -19,11 +19,27 @@ export type CreateDecisionInput = {
   tripId: string;
   createdByUserId: string;
   type: DecisionType;
-  title: string;
   description?: string;
   options: DecisionOptionInput[];
   minimumParticipation?: number;
 };
+
+// Spec 7.8 — algoritmo de mayoría simple.
+export function hasSimpleMajority(optionVoteCount: number, totalValidVotes: number): boolean {
+  if (totalValidVotes === 0) return false;
+  return optionVoteCount > totalValidVotes / 2;
+}
+
+// Spec 2.5 — no existe campo title: el título visible se deriva del type.
+export function getDecisionDisplayTitle(type: DecisionType): string {
+  const labels: Record<DecisionType, string> = {
+    dates: "Elegir fechas",
+    accommodation: "Elegir alojamiento",
+    transport: "Elegir transporte",
+  };
+
+  return labels[type];
+}
 
 // Spec 2.5
 export type VoteInput = {
@@ -61,7 +77,7 @@ export type DecisionOutput = {
   id: string;
   tripId: string;
   type: DecisionType;
-  title: string;
+  displayTitle: string;
   description?: string;
   status: DecisionStatus;
   options: DecisionOptionOutput[];

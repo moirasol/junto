@@ -11,12 +11,6 @@ import { DecisionOptionCard } from "./DecisionOptionCard";
 import { DecisionStatusBadge } from "./DecisionStatusBadge";
 import { ParticipationSummary } from "./ParticipationSummary";
 
-const TYPE_LABEL: Record<string, string> = {
-  dates: "Fechas",
-  accommodation: "Alojamiento",
-  transport: "Transporte",
-};
-
 export function DecisionCard({ trip, decision }: { trip: TripOutput; decision: DecisionOutput }) {
   const [error, setError] = useState<string | null>(null);
   const [selectedForConfirm, setSelectedForConfirm] = useState<string>(
@@ -63,10 +57,7 @@ export function DecisionCard({ trip, decision }: { trip: TripOutput; decision: D
   return (
     <Card className="space-y-3">
       <div className="flex items-center justify-between gap-2">
-        <div>
-          <p className="text-xs font-medium uppercase text-neutral-400">{TYPE_LABEL[decision.type]}</p>
-          <h3 className="font-semibold text-neutral-900">{decision.title}</h3>
-        </div>
+        <h3 className="font-semibold text-neutral-900">{decision.displayTitle}</h3>
         <DecisionStatusBadge status={decision.status} />
       </div>
 
