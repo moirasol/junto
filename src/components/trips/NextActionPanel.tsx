@@ -1,0 +1,100 @@
+import Link from "next/link";
+import type { TripOutput } from "@/domain/trip";
+import { checkCoordinationConcentration } from "@/services/decisionService";
+import { Badge, Card } from "@/components/ui/Primitives";
+import { DecisionStatusBadge } from "@/components/decisions/DecisionStatusBadge";
+
+const TYPE_LABEL: Record<string, string> = {
+  dates: "Fechas",
+  accommodation: "Alojamiento",
+  transport: "Transporte",
+};
+
+export function NextActionPanel({ trip }: { trip: TripOutput }) {
+  const pending = trip.decisions.filter((d) => d.status !== "confirmed");
+  const resolved = trip.decisions.filter((d) => d.status === "confirmed");
+
+  const participantsWithMissingVotes = new Set(
+    pending.flatMap((d) => d.participation.missingParticipantIds)
+  );
+
+  // Spec 5.10 — COORDINATION_CONCENTRATED: no bloquea el avance, sólo alerta.
+  const { concentrated } = checkCoordinationConcentration(trip.id);
+
+  return (
+    <Card className="space-y-4">
+      <h2 className="font-semibold text-neutral-900">Próximos pasos</h2>
+
+      {trip.decisions.length === 0 ? (
+        <p className="text-sm text-neutral-500">
+          Todavía no hay decisiones creadas. Arrancá proponiendo fechas, alojamiento o transporte.
+        </p>
+      ) : (
+        <>
+          <div>
+            <h3 className="text-sm font-medium text-neutral-700">Pendientes</h3>
+            {pending.length === 0 ? (
+              <p className="text-sm text-neutral-500">No queda nada pendiente. Buen momento para pasar a gastos.</p>
+            ) : (
+              <ul className="mt-2 space-y-2">
+                {pending.map((decision) => (
+                  <li key={decision.id} className="flex items-center justify-between gap-2 text-sm">
+                    <span>
+                      {TYPE_LABEL[decision.type]}: {decision.title}
+                    </span>
+                    <DecisionStatusBadge status={decision.status} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <div>
+            <h3 className="text-sm font-medium text-neutral-700">Resueltas</h3>
+            {resolved.length === 0 ? (
+              <p className="text-sm text-neutral-500">Todavía no se confirmó ninguna decisión.</p>
+            ) : (
+              <ul className="mt-2 space-y-1 text-sm text-neutral-600">
+                {resolved.map((decision) => {
+                  const selected = decision.options.find((o) => o.id === decision.selectedOptionId);
+                  return (
+                    <li key={decision.id}>
+                      {TYPE_LABEL[decision.type]}: {selected?.label ?? decision.title}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+
+          {participantsWithMissingVotes.size > 0 && (
+            <Badge tone="warning">
+              Faltan {participantsWithMissingVotes.size} respuesta{participantsWithMissingVotes.size > 1 ? "s" : ""} en decisiones abiertas
+            </Badge>
+          )}
+
+          {concentrated && (
+            <div className="rounded-xl bg-amber-50 p-3 text-sm text-amber-800">
+              <p>La organización está quedando concentrada en una sola persona. Falta participación del grupo.</p>
+              <p className="mt-1 text-xs text-amber-700">
+                Sugerencia: pedir votos o comentarios a quienes todavía no participaron.
+              </p>
+            </div>
+          )}
+        </>
+      )}
+
+      <div className="flex flex-wrap gap-3 pt-2 text-sm">
+        <Link href={`/trips/${trip.id}/decisions`} className="text-brand-700 hover:underline">
+          Ir a decisiones
+        </Link>
+        <Link href={`/trips/${trip.id}/expenses`} className="text-brand-700 hover:underline">
+          Ir a gastos
+        </Link>
+        <Link href={`/trips/${trip.id}/settlement`} className="text-brand-700 hover:underline">
+          Ir a liquidación
+        </Link>
+      </div>
+    </Card>
+  );
+}

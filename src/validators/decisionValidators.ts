@@ -1,0 +1,61 @@
+import type {
+  CreateDecisionInput,
+  ConfirmDecisionInput,
+  DecisionOutput,
+  VoteInput,
+} from "@/domain/decision";
+import type { ParticipantOutput } from "@/domain/participant";
+
+const VALID_TYPES = ["dates", "accommodation", "transport"];
+
+// Spec 6.3
+export function validateCreateDecisionInput(input: CreateDecisionInput): string[] {
+  const errors: string[] = [];
+
+  if (!input.title?.trim()) errors.push("Poné un título para la decisión.");
+  if (!VALID_TYPES.includes(input.type)) errors.push("El tipo de decisión no es válido.");
+  if (!input.options || input.options.length < 2) {
+    errors.push("Agregá al menos dos opciones.");
+  }
+  input.options?.forEach((option) => {
+    if (!option.label?.trim()) errors.push("Todas las opciones necesitan un texto.");
+  });
+
+  return errors;
+}
+
+// Spec 6.3
+export function validateVoteInput(
+  input: VoteInput,
+  decision: DecisionOutput | undefined,
+  participants: ParticipantOutput[]
+): string[] {
+  const errors: string[] = [];
+
+  if (!decision) {
+    errors.push("La decisión no existe.");
+    return errors;
+  }
+  if (!input.participantId?.trim()) errors.push("Falta indicar quién vota.");
+
+  const belongsToTrip = participants.some((p) => p.id === input.participantId);
+  if (!belongsToTrip) errors.push("Ese participante no pertenece a este viaje.");
+
+  const optionExists = decision.options.some((o) => o.id === input.optionId);
+  if (!optionExists) errors.push("Esa opción no existe en esta decisión.");
+
+  if (decision.status === "confirmed") {
+    errors.push("Esta decisión ya está confirmada. No se puede volver a votar.");
+  }
+
+  return errors;
+}
+
+// Spec 6.3
+export function validateConfirmDecisionInput(input: ConfirmDecisionInput): string[] {
+  const errors: string[] = [];
+  if (input.explicitConfirmation !== true) {
+    errors.push("Falta la confirmación explícita del grupo.");
+  }
+  return errors;
+}
