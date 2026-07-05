@@ -1,5 +1,6 @@
 import type { TripOutput } from "@/domain/trip";
 import type { ExpenseAuditEntry } from "@/domain/expense";
+import { buildSeedTrips } from "./seedTrips";
 
 // TODO (spec §8): persistencia sin definir (local storage, DB mockeada,
 // Supabase, PostgreSQL). Se usa localStorage como mock mínimo para el
@@ -8,6 +9,19 @@ import type { ExpenseAuditEntry } from "@/domain/expense";
 const TRIPS_KEY = "junto:trips";
 const AUDIT_KEY = "junto:expense-audit";
 const DECISION_ACTIVITY_KEY = "junto:decision-activity";
+const SEEDED_KEY = "junto:seeded";
+
+// Carga los viajes de demo una única vez, sólo si nunca se cargaron antes
+// y no hay nada guardado todavía (para no resucitar viajes que el usuario
+// borró a propósito).
+function ensureSeeded(): void {
+  if (typeof window === "undefined") return;
+  if (window.localStorage.getItem(SEEDED_KEY)) return;
+  window.localStorage.setItem(SEEDED_KEY, "1");
+  if (!window.localStorage.getItem(TRIPS_KEY)) {
+    window.localStorage.setItem(TRIPS_KEY, JSON.stringify(buildSeedTrips()));
+  }
+}
 
 type Listener = () => void;
 const listeners = new Set<Listener>();
@@ -23,6 +37,7 @@ export function subscribe(listener: Listener): () => void {
 
 function readTrips(): TripOutput[] {
   if (typeof window === "undefined") return [];
+  ensureSeeded();
   const raw = window.localStorage.getItem(TRIPS_KEY);
   if (!raw) return [];
   try {
