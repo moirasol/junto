@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { HandCoins } from "lucide-react";
 import { useTrip } from "@/lib/hooks";
 import { exportTripData, deleteTripData, closeTripWithoutExpenses } from "@/services/tripService";
 import { getActingUserId } from "@/lib/currentUser";
@@ -16,9 +16,7 @@ export default function SettlementPage() {
   const [deleteChecked, setDeleteChecked] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  if (!trip) {
-    return <p className="text-neutral-600">No encontramos ese viaje.</p>;
-  }
+  if (!trip) return null;
 
   function handleExport() {
     const result = exportTripData(tripId);
@@ -52,12 +50,10 @@ export default function SettlementPage() {
   }
 
   return (
-    <main className="space-y-6">
-      <Link href={`/trips/${tripId}`} className="text-sm text-brand-700 hover:underline">
-        ← Volver al viaje
-      </Link>
-
-      <h1 className="text-2xl font-bold text-neutral-900">Liquidación</h1>
+    <div className="space-y-6">
+      <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-900">
+        <HandCoins className="text-brand-600" /> Liquidación
+      </h1>
 
       <SettlementProposal trip={trip} />
 
@@ -103,6 +99,6 @@ export default function SettlementPage() {
           </p>
         )}
       </Card>
-    </main>
+    </div>
   );
 }

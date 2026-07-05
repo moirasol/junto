@@ -39,6 +39,19 @@ export type AIActionOutput = {
 
 const LOW_CONFIDENCE_THRESHOLD = 0.8;
 
+// Interpreta montos en formato es-AR: la coma es siempre el separador
+// decimal; un punto sin coma se asume separador de miles cuando agrupa de a
+// 3 dígitos (ej. "45.000"), si no se trata como decimal (ej. "45.5").
+function parseAmount(raw: string): number {
+  if (raw.includes(",")) {
+    return Number(raw.replace(/\./g, "").replace(",", "."));
+  }
+  if (/^\d{1,3}(\.\d{3})+$/.test(raw)) {
+    return Number(raw.replace(/\./g, ""));
+  }
+  return Number(raw);
+}
+
 // Spec 6.7 — rechazar comando vacío.
 export function parseNaturalLanguageCommand(
   input: NaturalLanguageCommandInput
@@ -54,8 +67,11 @@ export function parseNaturalLanguageCommand(
   const actions: AIAction[] = [];
 
   // Gasto: "<Nombre> pagó/pago <monto> de <descripción>[ para todos[ menos para <excluidos>]]"
+  // \p{L} (con flag u) matea letras Unicode para reconocer nombres con
+  // tildes/ñ; la descripción sólo excluye el punto para permitir comas
+  // naturales ("de entrada al museo, para todos").
   const expenseMatch = text.match(
-    /(\w+)\s+pag(?:ó|o)\s+(\d+(?:[.,]\d+)?)\s+de\s+([^.,]+?)(?:\s+para\s+todos)?(?:\s+menos\s+(?:para\s+)?([^.]+))?(?:\.|$)/i
+    /(\p{L}+)\s+pag(?:ó|o)\s+([\d.,]+)\s+de\s+([^.]+?)(?:\s+para\s+todos)?(?:\s+menos\s+(?:para\s+)?([^.]+))?(?:\.|$)/iu
   );
   if (expenseMatch) {
     const [, payerName, amountRaw, description, excludedRaw] = expenseMatch;
@@ -68,16 +84,18 @@ export function parseNaturalLanguageCommand(
       requiresHumanConfirmation: true,
       payload: {
         payerName,
-        amount: Number(amountRaw!.replace(",", ".")),
+        amount: parseAmount(amountRaw!),
         currency: "ARS",
-        description: description!.trim(),
+        description: description!.trim().replace(/,\s*$/, ""),
         excludedParticipantNames,
       },
     });
   }
 
   // Transporte: "<Nombre> tiene auto disponible con <n> lugares"
-  const transportMatch = text.match(/(\w+)\s+tiene\s+auto\s+disponible\s+con\s+(\d+)\s+lugares?/i);
+  const transportMatch = text.match(
+    /(\p{L}+)\s+tiene\s+auto\s+disponible\s+con\s+(\d+)\s+lugares?/iu
+  );
   if (transportMatch) {
     const [, ownerName, seatsRaw] = transportMatch;
     actions.push({

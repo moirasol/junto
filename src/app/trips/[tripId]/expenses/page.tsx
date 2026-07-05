@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useParams } from "next/navigation";
+import { Wallet } from "lucide-react";
 import { useTrip } from "@/lib/hooks";
 import { calculateBalances } from "@/services/expenseService";
 import { ExpenseForm } from "@/components/expenses/ExpenseForm";
@@ -13,20 +13,16 @@ export default function ExpensesPage() {
   const { tripId } = useParams<{ tripId: string }>();
   const trip = useTrip(tripId);
 
-  if (!trip) {
-    return <p className="text-neutral-600">No encontramos ese viaje.</p>;
-  }
+  if (!trip) return null;
 
   const acceptedParticipants = trip.participants.filter((p) => p.status === "accepted");
   const balances = calculateBalances(tripId);
 
   return (
-    <main className="space-y-6">
-      <Link href={`/trips/${tripId}`} className="text-sm text-brand-700 hover:underline">
-        ← Volver al viaje
-      </Link>
-
-      <h1 className="text-2xl font-bold text-neutral-900">Gastos</h1>
+    <div className="space-y-6">
+      <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-900">
+        <Wallet className="text-brand-600" /> Gastos
+      </h1>
 
       {acceptedParticipants.length === 0 ? (
         <EmptyState
@@ -48,6 +44,6 @@ export default function ExpensesPage() {
           <BalanceSummary trip={trip} balances={balances} />
         </>
       )}
-    </main>
+    </div>
   );
 }

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useParams } from "next/navigation";
+import { ListChecks } from "lucide-react";
 import { useTrip } from "@/lib/hooks";
 import { createDecision } from "@/services/decisionService";
 import { getActingUserId } from "@/lib/currentUser";
@@ -26,9 +26,7 @@ export default function DecisionsPage() {
   const [error, setError] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
 
-  if (!trip) {
-    return <p className="text-neutral-600">No encontramos ese viaje.</p>;
-  }
+  if (!trip) return null;
 
   function updateOption(index: number, value: string) {
     setOptionLabels((labels) => labels.map((label, i) => (i === index ? value : label)));
@@ -66,13 +64,11 @@ export default function DecisionsPage() {
   }
 
   return (
-    <main className="space-y-6">
-      <Link href={`/trips/${tripId}`} className="text-sm text-brand-700 hover:underline">
-        ← Volver al viaje
-      </Link>
-
+    <div className="space-y-6">
       <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-neutral-900">Decisiones</h1>
+        <h1 className="flex items-center gap-2 text-2xl font-bold text-neutral-900">
+          <ListChecks className="text-brand-600" /> Decisiones
+        </h1>
         <Button onClick={() => setFormOpen((v) => !v)}>{formOpen ? "Cancelar" : "+ Nueva decisión"}</Button>
       </header>
 
@@ -139,6 +135,6 @@ export default function DecisionsPage() {
           ))}
         </div>
       )}
-    </main>
+    </div>
   );
 }

@@ -48,6 +48,10 @@ export function validateVoteInput(
     errors.push("Esta decisión ya está confirmada. No se puede volver a votar.");
   }
 
+  if (decision.status === "needs_review") {
+    errors.push("Esta decisión necesita revisión del grupo antes de volver a votarse.");
+  }
+
   return errors;
 }
 

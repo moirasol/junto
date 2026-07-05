@@ -1,3 +1,4 @@
+import { CircleDot, CircleAlert, CircleCheck, CircleHelp, Scale } from "lucide-react";
 import type { DecisionStatus } from "@/domain/decision";
 import { Badge } from "@/components/ui/Primitives";
 
@@ -17,6 +18,19 @@ const TONE: Record<DecisionStatus, "neutral" | "brand" | "warning" | "danger" | 
   needs_review: "warning",
 };
 
+const ICON: Record<DecisionStatus, typeof CircleDot> = {
+  open: CircleDot,
+  blocked: Scale,
+  ready_to_confirm: CircleHelp,
+  confirmed: CircleCheck,
+  needs_review: CircleAlert,
+};
+
 export function DecisionStatusBadge({ status }: { status: DecisionStatus }) {
-  return <Badge tone={TONE[status]}>{LABEL[status]}</Badge>;
+  const Icon = ICON[status];
+  return (
+    <Badge tone={TONE[status]} className="gap-1">
+      <Icon size={12} /> {LABEL[status]}
+    </Badge>
+  );
 }

@@ -90,7 +90,7 @@ export function editConfirmedExpense(
   if (!expense) return fail("EXPENSE_NOT_FOUND", "No encontramos ese gasto.");
 
   if (expense.status === "confirmed") {
-    const errors = validateEditConfirmedExpenseInput(input);
+    const errors = validateEditConfirmedExpenseInput(input, expense.createdByUserId);
     if (errors.length > 0) {
       return fail("CONFIRMED_EXPENSE_REQUIRES_EXPLICIT_ACTION", errors.join(" "));
     }

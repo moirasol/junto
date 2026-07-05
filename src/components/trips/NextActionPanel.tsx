@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { TripOutput } from "@/domain/trip";
 import { checkCoordinationConcentration } from "@/services/decisionService";
 import { Badge, Card } from "@/components/ui/Primitives";
@@ -83,18 +82,6 @@ export function NextActionPanel({ trip }: { trip: TripOutput }) {
           )}
         </>
       )}
-
-      <div className="flex flex-wrap gap-3 pt-2 text-sm">
-        <Link href={`/trips/${trip.id}/decisions`} className="text-brand-700 hover:underline">
-          Ir a decisiones
-        </Link>
-        <Link href={`/trips/${trip.id}/expenses`} className="text-brand-700 hover:underline">
-          Ir a gastos
-        </Link>
-        <Link href={`/trips/${trip.id}/settlement`} className="text-brand-700 hover:underline">
-          Ir a liquidación
-        </Link>
-      </div>
     </Card>
   );
 }

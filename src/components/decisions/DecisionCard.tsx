@@ -79,7 +79,7 @@ export function DecisionCard({ trip, decision }: { trip: TripOutput; decision: D
             key={option.id}
             option={option}
             isMyVote={myVote?.optionId === option.id}
-            votingDisabled={decision.status === "confirmed"}
+            votingDisabled={decision.status === "confirmed" || decision.status === "needs_review"}
             onVote={() => handleVote(option.id)}
           />
         ))}

@@ -18,14 +18,20 @@ export function validateExpenseInput(input: CreateExpenseInput): string[] {
 }
 
 // Spec 6.5 / 5.7 — CONFIRMED_EXPENSE_REQUIRES_EXPLICIT_ACTION
-export function validateEditConfirmedExpenseInput(input: EditConfirmedExpenseInput): string[] {
+// `actualCreatedByUserId` viene del gasto guardado (no de lo que declara el
+// llamador) para que la autorización no dependa únicamente de campos que el
+// propio llamador puede completar como quiera.
+export function validateEditConfirmedExpenseInput(
+  input: EditConfirmedExpenseInput,
+  actualCreatedByUserId: string
+): string[] {
   if (!input.explicitConfirmationFromOriginalCreator) {
     return [
       "Este gasto ya está confirmado. Sólo puede cambiarlo quien lo cargó con una confirmación explícita.",
     ];
   }
 
-  if (input.requestedByUserId !== input.originalCreatedByUserId) {
+  if (input.requestedByUserId !== actualCreatedByUserId) {
     return ["Sólo quien cargó el gasto puede autorizar este cambio."];
   }
 
