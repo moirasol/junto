@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Users } from "lucide-react";
 import { useTrip } from "@/lib/hooks";
-import { inviteParticipants, acceptInvitation } from "@/services/tripService";
+import { inviteParticipants } from "@/services/tripService";
 import { setActingParticipantId } from "@/lib/currentUser";
 import { AvatarStack, Button, Card, FieldLabel, TextInput } from "@/components/ui/Primitives";
 
@@ -45,17 +45,10 @@ export default function JoinTripPage() {
       return;
     }
 
+    // Usar el link te identifica dentro del viaje, pero no implica todavía
+    // que confirmaste que vas: quedás "invitado" y confirmás vos mismo con
+    // "Aceptar" al entrar (mismo flujo que una invitación manual).
     const newParticipant = invited.data[0]!;
-    const accepted = acceptInvitation({
-      tripId: trip!.id,
-      participantId: newParticipant.id,
-      response: "accepted",
-    });
-    if (!accepted.success) {
-      setError(accepted.message);
-      return;
-    }
-
     setActingParticipantId(trip!.id, newParticipant.id);
     router.push(`/trips/${trip!.id}`);
   }
