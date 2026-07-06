@@ -61,7 +61,9 @@ export function DecisionCard({ trip, decision }: { trip: TripOutput; decision: D
       </div>
 
       {decision.description && <p className="text-sm text-neutral-600">{decision.description}</p>}
-      {decision.aiSummary && <p className="text-sm italic text-neutral-500">{decision.aiSummary}</p>}
+      {decision.aiSummary && decision.status !== "confirmed" && (
+        <p className="text-sm italic text-neutral-500">{decision.aiSummary}</p>
+      )}
 
       <div className="space-y-2">
         {decision.options.map((option) => (
