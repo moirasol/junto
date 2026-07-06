@@ -5,7 +5,8 @@ import type { TripOutput } from "@/domain/trip";
 import type { AIAction, AIActionOutput } from "@/services/aiCommandService";
 import { createExpense } from "@/services/expenseService";
 import { generateSettlement } from "@/services/settlementService";
-import { getActingUserId } from "@/lib/currentUser";
+import { voteDecision } from "@/services/decisionService";
+import { getActingParticipantId, getActingUserId } from "@/lib/currentUser";
 import { normalizeText } from "@/lib/text";
 import { formatMoney } from "@/lib/money";
 import { Badge, Button, Card } from "@/components/ui/Primitives";
@@ -18,6 +19,7 @@ const ACTION_LABEL: Record<AIAction["type"], string> = {
   parse_expense: "Gasto detectado",
   parse_transport_option: "Opción de transporte detectada",
   parse_date_option: "Posible fecha detectada",
+  vote_decision: "Voto detectado",
   generate_settlement: "Liquidación",
 };
 
@@ -88,6 +90,32 @@ export function AIReviewPanel({
     onApplied("Gasto cargado a partir del texto.");
   }
 
+  function applyVote(action: AIAction, index: number) {
+    setActionError(null);
+    const payload = action.payload as { decisionId: string; optionId: string };
+    const participantId = getActingParticipantId(trip.id);
+
+    if (!participantId) {
+      setActionError("Elegí quién sos en Integrantes para poder votar.");
+      return;
+    }
+
+    const result = voteDecision({
+      tripId: trip.id,
+      decisionId: payload.decisionId,
+      participantId,
+      optionId: payload.optionId,
+    });
+
+    if (!result.success) {
+      setActionError(result.message);
+      return;
+    }
+
+    markApplied(index);
+    onApplied("Voto registrado a partir del texto.");
+  }
+
   function applySettlement(index: number) {
     setActionError(null);
     const result = generateSettlement({ tripId: trip.id, requestedByUserId: getActingUserId(trip.id) });
@@ -138,6 +166,10 @@ export function AIReviewPanel({
                 <Button className="mt-2" onClick={() => applySettlement(index)}>
                   Generar liquidación
                 </Button>
+              ) : action.type === "vote_decision" ? (
+                <Button className="mt-2" onClick={() => applyVote(action, index)}>
+                  Registrar voto
+                </Button>
               ) : (
                 <p className="mt-2 text-xs text-neutral-500">
                   Junto no completa esto solo: registralo manualmente en la sección correspondiente.
@@ -183,6 +215,13 @@ function ActionPayloadPreview({ action }: { action: AIAction }) {
   if (action.type === "parse_date_option") {
     const payload = action.payload as { rawText: string };
     return <p className="mt-1 text-sm text-neutral-600">&ldquo;{payload.rawText}&rdquo;</p>;
+  }
+
+  if (action.type === "vote_decision") {
+    const payload = action.payload as { label: string };
+    return (
+      <p className="mt-1 text-sm text-neutral-600">Votar por &ldquo;{payload.label}&rdquo;.</p>
+    );
   }
 
   if (action.type === "suggest_next_step") {

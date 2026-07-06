@@ -10,6 +10,7 @@ import { AIReviewPanel } from "./AIReviewPanel";
 export function AICommandInput({ trip }: { trip: TripOutput }) {
   const [text, setText] = useState("");
   const [result, setResult] = useState<AIActionOutput | null>(null);
+  const [resultKey, setResultKey] = useState(0);
   const [confirmationMessage, setConfirmationMessage] = useState<string | null>(null);
 
   function handleSubmit(event: React.FormEvent) {
@@ -22,6 +23,7 @@ export function AICommandInput({ trip }: { trip: TripOutput }) {
       locale: "es-AR",
     });
     setResult(output);
+    setResultKey((k) => k + 1);
   }
 
   return (
@@ -50,7 +52,12 @@ export function AICommandInput({ trip }: { trip: TripOutput }) {
       )}
 
       {result && (
-        <AIReviewPanel trip={trip} result={result} onApplied={(message) => setConfirmationMessage(message)} />
+        <AIReviewPanel
+          key={resultKey}
+          trip={trip}
+          result={result}
+          onApplied={(message) => setConfirmationMessage(message)}
+        />
       )}
     </Card>
   );

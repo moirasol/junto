@@ -1,5 +1,6 @@
 import type { DecisionOutput } from "@/domain/decision";
-import { joinWithY } from "@/lib/text";
+import { joinWithY, normalizeText } from "@/lib/text";
+import { getTrip } from "@/lib/storage";
 
 // TODO (spec §8): integración real con claude-sonnet-4 sin definir. Esta
 // capa es un mock determinístico: interpreta patrones de texto simples, no
@@ -23,6 +24,7 @@ export type AIActionType =
   | "parse_expense"
   | "parse_transport_option"
   | "parse_date_option"
+  | "vote_decision"
   | "generate_settlement";
 
 export type AIAction = {
@@ -66,12 +68,12 @@ export function parseNaturalLanguageCommand(
 
   const actions: AIAction[] = [];
 
-  // Gasto: "<Nombre> pagó/pago <monto> de <descripción>[ para todos[ menos para <excluidos>]]"
+  // Gasto: "<Nombre> pagó/gastó/cargó <monto> de <descripción>[ para todos[ menos para <excluidos>]]"
   // \p{L} (con flag u) matea letras Unicode para reconocer nombres con
   // tildes/ñ; la descripción sólo excluye el punto para permitir comas
   // naturales ("de entrada al museo, para todos").
   const expenseMatch = text.match(
-    /(\p{L}+)\s+pag(?:ó|o)\s+([\d.,]+)\s+de\s+([^.]+?)(?:\s+para\s+todos)?(?:\s+menos\s+(?:para\s+)?([^.]+))?(?:\.|$)/iu
+    /(\p{L}+)\s+(?:pag(?:ó|o)|gast(?:ó|é|e)|carg(?:ó|ué|ue))\s+([\d.,]+)\s+de\s+([^.]+?)(?:\s+para\s+todos)?(?:\s+menos\s+(?:para\s+)?([^.]+))?(?:\.|$)/iu
   );
   if (expenseMatch) {
     const [, payerName, amountRaw, description, excludedRaw] = expenseMatch;
@@ -92,9 +94,9 @@ export function parseNaturalLanguageCommand(
     });
   }
 
-  // Transporte: "<Nombre> tiene auto disponible con <n> lugares"
+  // Transporte: "<Nombre> tiene auto [disponible] con <n> lugares/asientos"
   const transportMatch = text.match(
-    /(\p{L}+)\s+tiene\s+auto\s+disponible\s+con\s+(\d+)\s+lugares?/iu
+    /(\p{L}+)\s+tiene\s+auto\s+(?:disponible\s+)?con\s+(\d+)\s+(?:lugares?|asientos?)/iu
   );
   if (transportMatch) {
     const [, ownerName, seatsRaw] = transportMatch;
@@ -108,6 +110,45 @@ export function parseNaturalLanguageCommand(
         seats: Number(seatsRaw),
       },
     });
+  }
+
+  // Voto: "voto por <opción>" — matchea contra las opciones reales de las
+  // decisiones abiertas del viaje (no está en el spec original; se agrega
+  // como mejora de la simulación, sigue sin llamar a ningún modelo real).
+  const voteMatch = text.match(/vot(?:o|a|amos)\s+por\s+(.+?)(?:\.|$)/iu);
+  if (voteMatch) {
+    const trip = getTrip(input.tripId);
+    const referenceText = normalizeText(voteMatch[1]!);
+
+    const votableDecisions = (trip?.decisions ?? []).filter(
+      (d) => d.status !== "confirmed" && d.status !== "needs_review"
+    );
+
+    let matchedOption: { decisionId: string; decisionType: string; optionId: string; label: string } | null = null;
+    for (const decision of votableDecisions) {
+      const option = decision.options.find((o) => {
+        const normLabel = normalizeText(o.label);
+        return referenceText.includes(normLabel) || normLabel.includes(referenceText);
+      });
+      if (option) {
+        matchedOption = {
+          decisionId: decision.id,
+          decisionType: decision.type,
+          optionId: option.id,
+          label: option.label,
+        };
+        break;
+      }
+    }
+
+    if (matchedOption) {
+      actions.push({
+        type: "vote_decision",
+        confidence: 0.86,
+        requiresHumanConfirmation: true,
+        payload: matchedOption,
+      });
+    }
   }
 
   // Decisión pendiente: "falta elegir <tipo>"
