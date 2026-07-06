@@ -25,10 +25,8 @@ export function SettlementProposal({ trip }: { trip: TripOutput }) {
   const [draftTransfers, setDraftTransfers] = useState<SuggestedTransfer[]>(
     trip.settlement?.suggestedTransfers ?? []
   );
-  const [acceptChecked, setAcceptChecked] = useState(false);
   const [closeChecked, setCloseChecked] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [rejectNotice, setRejectNotice] = useState<string | null>(null);
 
   const confirmedExpenses = trip.expenses.filter((e) => e.status === "confirmed");
 
@@ -67,26 +65,6 @@ export function SettlementProposal({ trip }: { trip: TripOutput }) {
       return;
     }
     setEditing(false);
-    setAcceptChecked(false);
-  }
-
-  // Spec 5.8 — SETTLEMENT_REJECTED: la liquidación se mantiene abierta para
-  // ajustes, no se cierra sin aceptación explícita.
-  function handleReject() {
-    setError(null);
-    if (!trip.settlement) return;
-    const result = adjustSettlement({
-      tripId: trip.id,
-      settlementId: trip.settlement.id,
-      adjustedByUserId: getActingUserId(trip.id),
-      transfers: trip.settlement.suggestedTransfers,
-      explicitGroupAcceptance: false,
-    });
-    if (!result.success) {
-      setError(result.message);
-      return;
-    }
-    setRejectNotice("La liquidación quedó abierta para ajustes.");
   }
 
   function handleClose() {
@@ -150,30 +128,16 @@ export function SettlementProposal({ trip }: { trip: TripOutput }) {
           {error}
         </p>
       )}
-      {rejectNotice && <p className="text-sm font-medium text-amber-700">{rejectNotice}</p>}
 
       {settlement.status === "suggested" || settlement.status === "adjusted" ? (
         <div className="space-y-3 border-t border-neutral-100 pt-3">
           {/* Acción primaria: aceptar la liquidación es lo que se espera hacer
               la mayoría de las veces, así que va primero y con más peso visual. */}
-          <div className="space-y-2 rounded-xl bg-brand-50 p-3">
-            <label className="flex items-center gap-2 text-sm text-neutral-700">
-              <input
-                type="checkbox"
-                checked={acceptChecked}
-                onChange={(e) => setAcceptChecked(e.target.checked)}
-              />
-              El grupo acepta esta liquidación
-            </label>
-            <Button
-              disabled={!acceptChecked}
-              onClick={() => handleSaveAdjustments(true)}
-            >
-              Aceptar liquidación
-            </Button>
+          <div className="rounded-xl bg-brand-50 p-3">
+            <Button onClick={() => handleSaveAdjustments(true)}>Aceptar liquidación</Button>
           </div>
 
-          {/* Acciones alternativas: menos peso visual, para no competir con la primaria. */}
+          {/* Acción alternativa: menos peso visual, para no competir con la primaria. */}
           {editing ? (
             <div className="flex gap-2">
               <Button variant="secondary" onClick={() => handleSaveAdjustments(false)}>
@@ -184,22 +148,15 @@ export function SettlementProposal({ trip }: { trip: TripOutput }) {
               </Button>
             </div>
           ) : (
-            <div className="flex flex-wrap gap-4">
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setDraftTransfers(settlement.suggestedTransfers);
-                  setEditing(true);
-                }}
-              >
-                Ajustar transferencias
-              </Button>
-              {settlement.status === "suggested" && (
-                <Button variant="ghost" onClick={handleReject}>
-                  El grupo no está de acuerdo
-                </Button>
-              )}
-            </div>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setDraftTransfers(settlement.suggestedTransfers);
+                setEditing(true);
+              }}
+            >
+              Ajustar transferencias
+            </Button>
           )}
         </div>
       ) : settlement.status === "accepted" ? (
