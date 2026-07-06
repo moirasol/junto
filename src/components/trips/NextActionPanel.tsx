@@ -25,7 +25,9 @@ export function NextActionPanel({ trip }: { trip: TripOutput }) {
       ) : (
         <>
           <div>
-            <h3 className="text-sm font-medium text-neutral-700">Pendientes</h3>
+            <Badge tone="warning" className="mb-2">
+              Pendientes
+            </Badge>
             {pending.length === 0 ? (
               <p className="text-sm text-neutral-500">No queda nada pendiente. Buen momento para pasar a gastos.</p>
             ) : (
@@ -41,7 +43,9 @@ export function NextActionPanel({ trip }: { trip: TripOutput }) {
           </div>
 
           <div>
-            <h3 className="text-sm font-medium text-neutral-700">Resueltas</h3>
+            <Badge tone="success" className="mb-2">
+              Resueltas
+            </Badge>
             {resolved.length === 0 ? (
               <p className="text-sm text-neutral-500">Todavía no se confirmó ninguna decisión.</p>
             ) : (
