@@ -39,10 +39,7 @@ export function AICommandInput({ trip }: { trip: TripOutput }) {
         <h2 className="flex items-center gap-2 font-semibold text-neutral-900">
           <Sparkles size={18} className="text-brand-600" /> Contale a Junto lo que pasó
         </h2>
-        <p className="text-sm text-neutral-500">
-          Por ejemplo: &ldquo;Juan pagó 45000 de supermercado para todos menos para Ana&rdquo;. Junto lo va a
-          interpretar, pero nada se carga sin que lo confirmes vos.
-        </p>
+        <p className="text-sm text-neutral-500">Anotá un gasto o dejá un recordatorio del viaje.</p>
       </div>
       <div className="flex flex-wrap gap-2">
         {EXAMPLE_MESSAGES.map((example) => (
