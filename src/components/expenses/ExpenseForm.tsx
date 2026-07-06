@@ -24,7 +24,7 @@ export function ExpenseForm({ trip }: { trip: TripOutput }) {
     setParticipantIds((ids) => (ids.includes(id) ? ids.filter((i) => i !== id) : [...ids, id]));
   }
 
-  function submit(status: "draft" | "confirmed") {
+  function submit() {
     setError(null);
     const result = createExpense({
       tripId: trip.id,
@@ -34,7 +34,7 @@ export function ExpenseForm({ trip }: { trip: TripOutput }) {
       currency,
       description: description.trim(),
       participantIds,
-      status,
+      status: "confirmed",
     });
 
     if (!result.success) {
@@ -125,12 +125,7 @@ export function ExpenseForm({ trip }: { trip: TripOutput }) {
         </p>
       )}
 
-      <div className="flex gap-2">
-        <Button variant="secondary" onClick={() => submit("draft")}>
-          Guardar borrador
-        </Button>
-        <Button onClick={() => submit("confirmed")}>Confirmar gasto</Button>
-      </div>
+      <Button onClick={submit}>Confirmar gasto</Button>
     </Card>
   );
 }
