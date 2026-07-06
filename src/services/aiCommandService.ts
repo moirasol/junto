@@ -39,8 +39,6 @@ export type AIActionOutput = {
   actions: AIAction[];
 };
 
-const LOW_CONFIDENCE_THRESHOLD = 0.8;
-
 // Interpreta montos en formato es-AR: la coma es siempre el separador
 // decimal; un punto sin coma se asume separador de miles cuando agrupa de a
 // 3 dígitos (ej. "45.000"), si no se trata como decimal (ej. "45.5").
@@ -189,12 +187,7 @@ export function parseNaturalLanguageCommand(
     };
   }
 
-  const lowConfidenceCount = actions.filter((a) => a.confidence < LOW_CONFIDENCE_THRESHOLD).length;
-  const summary = `Detecté ${actions.length} posible${actions.length > 1 ? "s" : ""} acci${
-    actions.length > 1 ? "ones" : "ón"
-  }. Revisalas antes de confirmarlas${lowConfidenceCount > 0 ? " (alguna necesita más revisión)" : ""}.`;
-
-  return { message: summary, actions };
+  return { message: "Esto entendí de tu mensaje:", actions };
 }
 
 // Spec 4.4.4 / 3.3 aiSummary — resumen determinístico de una decisión.

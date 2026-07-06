@@ -1,15 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { Check, X } from "lucide-react";
 import type { TripOutput } from "@/domain/trip";
-import type { AIAction, AIActionOutput } from "@/services/aiCommandService";
+import type { AIAction, AIActionOutput, AIActionType } from "@/services/aiCommandService";
 import { createExpense } from "@/services/expenseService";
 import { generateSettlement } from "@/services/settlementService";
 import { voteDecision } from "@/services/decisionService";
 import { getActingParticipantId, getActingUserId } from "@/lib/currentUser";
 import { normalizeText } from "@/lib/text";
 import { formatMoney } from "@/lib/money";
-import { Badge, Button, Card } from "@/components/ui/Primitives";
+import { Badge, Card } from "@/components/ui/Primitives";
 
 const ACTION_LABEL: Record<AIAction["type"], string> = {
   suggest_reminder: "Sugerencia de recordatorio",
@@ -22,6 +23,11 @@ const ACTION_LABEL: Record<AIAction["type"], string> = {
   vote_decision: "Voto detectado",
   generate_settlement: "Liquidación",
 };
+
+// Sólo estos tipos escriben algo (gasto, voto, liquidación): necesitan
+// confirmación explícita con check/cancel. El resto son avisos informativos
+// que no cambian nada en el viaje, así que no piden ninguna acción.
+const ACTIONABLE_TYPES: AIActionType[] = ["parse_expense", "vote_decision", "generate_settlement"];
 
 function findParticipantByName(trip: TripOutput, name: string) {
   const normalized = normalizeText(name);
@@ -38,10 +44,16 @@ export function AIReviewPanel({
   onApplied: (message: string) => void;
 }) {
   const [appliedIndexes, setAppliedIndexes] = useState<Set<number>>(new Set());
+  const [dismissedIndexes, setDismissedIndexes] = useState<Set<number>>(new Set());
   const [actionError, setActionError] = useState<string | null>(null);
 
   function markApplied(index: number) {
     setAppliedIndexes((prev) => new Set(prev).add(index));
+  }
+
+  function markDismissed(index: number) {
+    setActionError(null);
+    setDismissedIndexes((prev) => new Set(prev).add(index));
   }
 
   function applyExpense(action: AIAction, index: number) {
@@ -127,6 +139,12 @@ export function AIReviewPanel({
     onApplied("Liquidación generada.");
   }
 
+  function applyAction(action: AIAction, index: number) {
+    if (action.type === "parse_expense") applyExpense(action, index);
+    else if (action.type === "generate_settlement") applySettlement(index);
+    else if (action.type === "vote_decision") applyVote(action, index);
+  }
+
   return (
     <Card className="space-y-3">
       <p className="text-sm text-neutral-700">{result.message}</p>
@@ -140,6 +158,8 @@ export function AIReviewPanel({
       <ul className="space-y-2">
         {result.actions.map((action, index) => {
           const applied = appliedIndexes.has(index);
+          const dismissed = dismissedIndexes.has(index);
+          const isActionable = ACTIONABLE_TYPES.includes(action.type);
           const needsReview = action.confidence < 0.8;
 
           return (
@@ -148,33 +168,33 @@ export function AIReviewPanel({
                 <span className="text-sm font-medium text-neutral-900">
                   {ACTION_LABEL[action.type]}
                 </span>
-                <div className="flex items-center gap-2">
-                  {needsReview && <Badge tone="warning">Necesita revisión</Badge>}
-                  <Badge tone="neutral">{Math.round(action.confidence * 100)}% de confianza</Badge>
-                </div>
+                {isActionable && !applied && !dismissed && (
+                  <div className="flex items-center gap-2">
+                    {needsReview && <Badge tone="warning">Revisar</Badge>}
+                    <button
+                      type="button"
+                      aria-label="Aplicar"
+                      onClick={() => applyAction(action, index)}
+                      className="rounded-full bg-emerald-100 p-1.5 text-emerald-700 hover:bg-emerald-200"
+                    >
+                      <Check size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Descartar"
+                      onClick={() => markDismissed(index)}
+                      className="rounded-full bg-neutral-100 p-1.5 text-neutral-500 hover:bg-neutral-200"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                )}
               </div>
 
               <ActionPayloadPreview action={action} />
 
-              {applied ? (
-                <p className="mt-2 text-sm font-medium text-emerald-700">Aplicado.</p>
-              ) : action.type === "parse_expense" ? (
-                <Button className="mt-2" onClick={() => applyExpense(action, index)}>
-                  Cargar gasto
-                </Button>
-              ) : action.type === "generate_settlement" ? (
-                <Button className="mt-2" onClick={() => applySettlement(index)}>
-                  Generar liquidación
-                </Button>
-              ) : action.type === "vote_decision" ? (
-                <Button className="mt-2" onClick={() => applyVote(action, index)}>
-                  Registrar voto
-                </Button>
-              ) : (
-                <p className="mt-2 text-xs text-neutral-500">
-                  Junto no completa esto solo: registralo manualmente en la sección correspondiente.
-                </p>
-              )}
+              {applied && <p className="mt-2 text-sm font-medium text-emerald-700">Aplicado.</p>}
+              {dismissed && <p className="mt-2 text-sm text-neutral-400">Descartado.</p>}
             </li>
           );
         })}
