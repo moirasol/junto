@@ -130,8 +130,8 @@ export function ExpenseForm({ trip }: { trip: TripOutput }) {
             onClick={toggleAllParticipants}
             className={
               allSelected
-                ? "rounded-full bg-brand-600 px-3 py-1 text-sm font-medium text-white"
-                : "rounded-full bg-brand-50 px-3 py-1 text-sm font-medium text-brand-700 hover:bg-brand-100"
+                ? "rounded-full border-2 border-brand-600 bg-brand-100 px-3 py-1 text-sm font-medium text-brand-800"
+                : "rounded-full border-2 border-neutral-200 bg-white px-3 py-1 text-sm font-medium text-neutral-600 hover:border-neutral-300"
             }
           >
             {allSelected ? "✓ " : ""}Todos
@@ -145,8 +145,8 @@ export function ExpenseForm({ trip }: { trip: TripOutput }) {
                 onClick={() => toggleParticipant(p.id)}
                 className={
                   selected
-                    ? "rounded-full bg-brand-600 px-3 py-1 text-sm font-medium text-white"
-                    : "rounded-full bg-brand-50 px-3 py-1 text-sm font-medium text-brand-700 hover:bg-brand-100"
+                    ? "rounded-full border-2 border-brand-600 bg-brand-100 px-3 py-1 text-sm font-medium text-brand-800"
+                    : "rounded-full border-2 border-neutral-200 bg-white px-3 py-1 text-sm font-medium text-neutral-600 hover:border-neutral-300"
                 }
               >
                 {selected ? "✓ " : ""}
