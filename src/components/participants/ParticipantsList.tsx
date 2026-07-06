@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Link2, UserPlus, Users } from "lucide-react";
+import { Link2, MessageCircle, UserPlus, Users } from "lucide-react";
 import type { TripOutput } from "@/domain/trip";
 import { acceptInvitation, inviteParticipants, markParticipantLeft } from "@/services/tripService";
 import { getActingParticipantId, setActingParticipantId } from "@/lib/currentUser";
@@ -39,6 +39,15 @@ export function ParticipantsList({ trip }: { trip: TripOutput }) {
     navigator.clipboard.writeText(link);
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2000);
+  }
+
+  // Simula "mandarle la invitación por WhatsApp": no tenemos el teléfono de
+  // nadie, así que se abre WhatsApp Web/app con el mensaje ya armado y la
+  // persona elige a quién enviárselo (wa.me sin número funciona así).
+  function handleSendWhatsApp(participantName: string) {
+    const link = `${window.location.origin}/join/${trip.id}`;
+    const message = `Hola ${participantName}! Te invito a "${trip.name}" en Junto. Sumate acá: ${link}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank");
   }
 
   function handleAccept(participantId: string, participantName: string, response: "accepted" | "rejected") {
@@ -164,6 +173,9 @@ export function ParticipantsList({ trip }: { trip: TripOutput }) {
               <Badge tone={STATUS_TONE[participant.status]}>{STATUS_LABEL[participant.status]}</Badge>
               {participant.status === "invited" && (
                 <>
+                  <Button variant="ghost" onClick={() => handleSendWhatsApp(participant.name)}>
+                    <MessageCircle size={16} /> Enviar por WhatsApp
+                  </Button>
                   <Button
                     variant="secondary"
                     onClick={() => handleAccept(participant.id, participant.name, "accepted")}
