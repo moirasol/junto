@@ -7,7 +7,7 @@ const LABEL: Record<DecisionStatus, string> = {
   blocked: "Empatada",
   ready_to_confirm: "Lista para confirmar",
   confirmed: "Confirmada",
-  needs_review: "Necesita revisión",
+  needs_review: "Revisar",
 };
 
 const TONE: Record<DecisionStatus, "neutral" | "brand" | "warning" | "danger" | "success"> = {
