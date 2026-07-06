@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createTrip } from "@/services/tripService";
-import { getCurrentUserId } from "@/lib/currentUser";
+import { createTrip, acceptInvitation } from "@/services/tripService";
+import { getCurrentUserId, setActingParticipantId } from "@/lib/currentUser";
 import { getFrequentParticipantNames } from "@/lib/frequentParticipants";
 import { Button, Card, FieldLabel, TextInput } from "@/components/ui/Primitives";
 
@@ -62,6 +62,17 @@ export default function NewTripPage() {
       setErrorMessage(result.message);
       return;
     }
+
+    // Quien crea el viaje obviamente va: se acepta la invitación en su
+    // nombre para no pedirle que confirme su propia asistencia con un clic
+    // extra, y queda identificada como "vos" en Integrantes.
+    const creatorParticipant = result.data.participants[0]!;
+    acceptInvitation({
+      tripId: result.data.id,
+      participantId: creatorParticipant.id,
+      response: "accepted",
+    });
+    setActingParticipantId(result.data.id, creatorParticipant.id);
 
     router.push(`/trips/${result.data.id}`);
   }
