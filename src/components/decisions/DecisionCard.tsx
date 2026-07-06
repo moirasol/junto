@@ -16,7 +16,6 @@ export function DecisionCard({ trip, decision }: { trip: TripOutput; decision: D
   const [selectedForConfirm, setSelectedForConfirm] = useState<string>(
     decision.options.find((o) => o.isTopOption)?.id ?? decision.options[0]?.id ?? ""
   );
-  const [confirmChecked, setConfirmChecked] = useState(false);
   const [overrideOpen, setOverrideOpen] = useState(false);
   const [overrideChecked, setOverrideChecked] = useState(false);
 
@@ -114,29 +113,11 @@ export function DecisionCard({ trip, decision }: { trip: TripOutput; decision: D
       ) : decision.status === "ready_to_confirm" ? (
         <div className="space-y-2 rounded-xl bg-brand-50 p-3">
           <p className="text-sm text-neutral-700">
-            Ya hay suficiente participación. El grupo puede confirmar una opción.
+            Ya hay suficientes votos para &ldquo;
+            {decision.options.find((o) => o.id === selectedForConfirm)?.label}
+            &rdquo;.
           </p>
-          <select
-            aria-label="Opción a confirmar"
-            className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
-            value={selectedForConfirm}
-            onChange={(e) => setSelectedForConfirm(e.target.value)}
-          >
-            {decision.options.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-          <label className="flex items-center gap-2 text-sm text-neutral-700">
-            <input
-              type="checkbox"
-              checked={confirmChecked}
-              onChange={(e) => setConfirmChecked(e.target.checked)}
-            />
-            Confirmo esta opción en nombre del grupo
-          </label>
-          <Button onClick={() => handleConfirm(confirmChecked)}>Confirmar decisión</Button>
+          <Button onClick={() => handleConfirm(true)}>Confirmar decisión</Button>
         </div>
       ) : decision.status === "open" && decision.participation.votedParticipants > 0 ? (
         // Spec 5.3 — CONSENSUS_NOT_REACHED: no confirmar salvo override
