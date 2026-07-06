@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createTrip } from "@/services/tripService";
 import { getCurrentUserId } from "@/lib/currentUser";
 import { ARGENTINA_DESTINATIONS } from "@/lib/argentinaDestinations";
+import { getFrequentParticipantNames } from "@/lib/frequentParticipants";
 import { Button, Card, FieldLabel, TextInput } from "@/components/ui/Primitives";
 
 type ParticipantRow = { name: string; email: string; phone: string };
@@ -30,6 +31,26 @@ export default function NewTripPage() {
   function addParticipantRow() {
     setParticipants((rows) => [...rows, emptyRow()]);
   }
+
+  function addFrequentName(nameToAdd: string) {
+    setParticipants((rows) => {
+      const firstEmptyIndex = rows.findIndex((row) => !row.name.trim());
+      if (firstEmptyIndex === -1) {
+        return [...rows, { ...emptyRow(), name: nameToAdd }];
+      }
+      return rows.map((row, i) => (i === firstEmptyIndex ? { ...row, name: nameToAdd } : row));
+    });
+  }
+
+  const [frequentNames, setFrequentNames] = useState<string[]>([]);
+  const enteredNamesKey = [yourName, ...participants.map((row) => row.name)].join("|");
+
+  // Se calcula en un efecto (no en el render) porque lee localStorage: en el
+  // server no existe, y calcularlo directo en el render rompe la hidratación.
+  useEffect(() => {
+    setFrequentNames(getFrequentParticipantNames(enteredNamesKey.split("|")));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enteredNamesKey]);
 
   function removeParticipantRow(index: number) {
     setParticipants((rows) => rows.filter((_, i) => i !== index));
@@ -127,6 +148,26 @@ export default function NewTripPage() {
               + Agregar otro
             </Button>
           </div>
+
+          {frequentNames.length > 0 && (
+            <div>
+              <p className="mb-2 text-xs font-medium text-neutral-500">
+                Ya viajaste con ellos, ¿los sumás?
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {frequentNames.map((frequentName) => (
+                  <button
+                    key={frequentName}
+                    type="button"
+                    onClick={() => addFrequentName(frequentName)}
+                    className="rounded-full bg-brand-50 px-3 py-1 text-sm font-medium text-brand-700 hover:bg-brand-100"
+                  >
+                    + {frequentName}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="space-y-3">
             {participants.map((row, index) => (
