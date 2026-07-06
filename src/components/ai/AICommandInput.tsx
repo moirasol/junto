@@ -8,6 +8,12 @@ import { getActingUserId } from "@/lib/currentUser";
 import { Button, Card, FieldLabel, TextArea } from "@/components/ui/Primitives";
 import { AIReviewPanel } from "./AIReviewPanel";
 
+const EXAMPLE_MESSAGES = [
+  "Fede pagó 45000 de supermercado para todos",
+  "Sofi tiene auto con 4 asientos",
+  "Falta elegir alojamiento",
+];
+
 export function AICommandInput({ trip }: { trip: TripOutput }) {
   const [text, setText] = useState("");
   const [result, setResult] = useState<AIActionOutput | null>(null);
@@ -37,6 +43,18 @@ export function AICommandInput({ trip }: { trip: TripOutput }) {
           Por ejemplo: &ldquo;Juan pagó 45000 de supermercado para todos menos para Ana&rdquo;. Junto lo va a
           interpretar, pero nada se carga sin que lo confirmes vos.
         </p>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {EXAMPLE_MESSAGES.map((example) => (
+          <button
+            key={example}
+            type="button"
+            onClick={() => setText(example)}
+            className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 hover:bg-brand-100"
+          >
+            &ldquo;{example}&rdquo;
+          </button>
+        ))}
       </div>
       <form onSubmit={handleSubmit} className="space-y-2">
         <FieldLabel htmlFor="ai-command">Mensaje</FieldLabel>
