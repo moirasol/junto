@@ -8,52 +8,32 @@ import { ARGENTINA_DESTINATIONS } from "@/lib/argentinaDestinations";
 import { getFrequentParticipantNames } from "@/lib/frequentParticipants";
 import { Button, Card, FieldLabel, TextInput } from "@/components/ui/Primitives";
 
-type ParticipantRow = { name: string; email: string; phone: string };
-
-function emptyRow(): ParticipantRow {
-  return { name: "", email: "", phone: "" };
-}
-
 export default function NewTripPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [destination, setDestination] = useState("");
   const [yourName, setYourName] = useState("");
-  const [participants, setParticipants] = useState<ParticipantRow[]>([emptyRow(), emptyRow()]);
+  const [selectedFrequent, setSelectedFrequent] = useState<Set<string>>(new Set());
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  function updateParticipant(index: number, field: keyof ParticipantRow, value: string) {
-    setParticipants((rows) =>
-      rows.map((row, i) => (i === index ? { ...row, [field]: value } : row))
-    );
-  }
-
-  function addParticipantRow() {
-    setParticipants((rows) => [...rows, emptyRow()]);
-  }
-
-  function addFrequentName(nameToAdd: string) {
-    setParticipants((rows) => {
-      const firstEmptyIndex = rows.findIndex((row) => !row.name.trim());
-      if (firstEmptyIndex === -1) {
-        return [...rows, { ...emptyRow(), name: nameToAdd }];
-      }
-      return rows.map((row, i) => (i === firstEmptyIndex ? { ...row, name: nameToAdd } : row));
-    });
-  }
-
   const [frequentNames, setFrequentNames] = useState<string[]>([]);
-  const enteredNamesKey = [yourName, ...participants.map((row) => row.name)].join("|");
 
   // Se calcula en un efecto (no en el render) porque lee localStorage: en el
   // server no existe, y calcularlo directo en el render rompe la hidratación.
   useEffect(() => {
-    setFrequentNames(getFrequentParticipantNames(enteredNamesKey.split("|")));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enteredNamesKey]);
+    setFrequentNames(getFrequentParticipantNames([yourName]));
+  }, [yourName]);
 
-  function removeParticipantRow(index: number) {
-    setParticipants((rows) => rows.filter((_, i) => i !== index));
+  function toggleFrequent(frequentName: string) {
+    setSelectedFrequent((selected) => {
+      const next = new Set(selected);
+      if (next.has(frequentName)) {
+        next.delete(frequentName);
+      } else {
+        next.add(frequentName);
+      }
+      return next;
+    });
   }
 
   function handleSubmit(event: React.FormEvent) {
@@ -65,21 +45,18 @@ export default function NewTripPage() {
       return;
     }
 
-    const cleanedParticipants = participants
-      .filter((row) => row.name.trim())
-      .map((row) => ({
-        name: row.name.trim(),
-        ...(row.email.trim() ? { email: row.email.trim() } : {}),
-        ...(row.phone.trim() ? { phone: row.phone.trim() } : {}),
-      }));
-
     const result = createTrip({
       name: name.trim(),
       destination: destination.trim(),
       createdByUserId: getCurrentUserId(),
       // Vos (quien crea el viaje) siempre vas primero en la lista, para que
-      // quede claro quién lo creó (ver etiqueta "creador" en Integrantes).
-      participants: [{ name: yourName.trim() }, ...cleanedParticipants],
+      // quede claro quién lo creó (ver etiqueta "creador" en Integrantes). El
+      // resto de la gente se suma después desde Integrantes (a mano o por
+      // link) — acá sólo se pre-cargan compañeros frecuentes, si los elegís.
+      participants: [
+        { name: yourName.trim() },
+        ...[...selectedFrequent].map((frequentName) => ({ name: frequentName })),
+      ],
     });
 
     if (!result.success) {
@@ -141,68 +118,38 @@ export default function NewTripPage() {
           </div>
         </Card>
 
-        <Card className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-neutral-900">Otros integrantes</h2>
-            <Button type="button" variant="ghost" onClick={addParticipantRow}>
-              + Agregar otro
-            </Button>
-          </div>
-
-          {frequentNames.length > 0 && (
-            <div>
-              <p className="mb-2 text-xs font-medium text-neutral-500">
-                Ya viajaste con ellos, ¿los sumás?
-              </p>
+        <Card className="space-y-3">
+          <h2 className="font-semibold text-neutral-900">Compañeros frecuentes</h2>
+          {frequentNames.length > 0 ? (
+            <>
+              <p className="text-xs font-medium text-neutral-500">Ya viajaste con ellos, ¿los sumás?</p>
               <div className="flex flex-wrap gap-2">
-                {frequentNames.map((frequentName) => (
-                  <button
-                    key={frequentName}
-                    type="button"
-                    onClick={() => addFrequentName(frequentName)}
-                    className="rounded-full bg-brand-50 px-3 py-1 text-sm font-medium text-brand-700 hover:bg-brand-100"
-                  >
-                    + {frequentName}
-                  </button>
-                ))}
+                {frequentNames.map((frequentName) => {
+                  const selected = selectedFrequent.has(frequentName);
+                  return (
+                    <button
+                      key={frequentName}
+                      type="button"
+                      onClick={() => toggleFrequent(frequentName)}
+                      className={
+                        selected
+                          ? "rounded-full bg-brand-600 px-3 py-1 text-sm font-medium text-white"
+                          : "rounded-full bg-brand-50 px-3 py-1 text-sm font-medium text-brand-700 hover:bg-brand-100"
+                      }
+                    >
+                      {selected ? "✓ " : "+ "}
+                      {frequentName}
+                    </button>
+                  );
+                })}
               </div>
-            </div>
+            </>
+          ) : (
+            <p className="text-sm text-neutral-500">
+              Todavía no tenés compañeros frecuentes. Después de crear el viaje, invitá al resto del grupo
+              desde Integrantes (por nombre o compartiendo el link).
+            </p>
           )}
-
-          <div className="space-y-3">
-            {participants.map((row, index) => (
-              <div key={index} className="grid grid-cols-1 gap-2 sm:grid-cols-[2fr_2fr_auto]">
-                <div>
-                  <FieldLabel htmlFor={`participant-name-${index}`}>Nombre</FieldLabel>
-                  <TextInput
-                    id={`participant-name-${index}`}
-                    value={row.name}
-                    onChange={(e) => updateParticipant(index, "name", e.target.value)}
-                    placeholder="Nombre"
-                  />
-                </div>
-                <div>
-                  <FieldLabel htmlFor={`participant-email-${index}`}>Email (opcional)</FieldLabel>
-                  <TextInput
-                    id={`participant-email-${index}`}
-                    value={row.email}
-                    onChange={(e) => updateParticipant(index, "email", e.target.value)}
-                    placeholder="email@ejemplo.com"
-                  />
-                </div>
-                <div className="flex items-end">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => removeParticipantRow(index)}
-                    disabled={participants.length <= 1}
-                  >
-                    Quitar
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
         </Card>
 
         {errorMessage && (
