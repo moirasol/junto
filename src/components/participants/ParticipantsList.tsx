@@ -176,18 +176,29 @@ export function ParticipantsList({ trip }: { trip: TripOutput }) {
                   <Button variant="ghost" onClick={() => handleSendWhatsApp(participant.name)}>
                     <MessageCircle size={16} /> Enviar por WhatsApp
                   </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => handleAccept(participant.id, participant.name, "accepted")}
-                  >
-                    Aceptar
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => handleAccept(participant.id, participant.name, "rejected")}
-                  >
-                    Rechazar
-                  </Button>
+                  {actingParticipantId === participant.id ? (
+                    <>
+                      <Button
+                        variant="secondary"
+                        onClick={() => handleAccept(participant.id, participant.name, "accepted")}
+                      >
+                        Aceptar
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        onClick={() => handleAccept(participant.id, participant.name, "rejected")}
+                      >
+                        Rechazar
+                      </Button>
+                    </>
+                  ) : (
+                    // Aceptar/Rechazar es una decisión de esa persona, no de
+                    // quien mira la pantalla: para simular su respuesta hay
+                    // que "actuar como" ella primero (mismo mock que el resto).
+                    <Button variant="ghost" onClick={() => handleChooseActing(participant.id)}>
+                      Actuar como
+                    </Button>
+                  )}
                 </>
               )}
               {participant.status === "accepted" && actingParticipantId !== participant.id && (
