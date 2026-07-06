@@ -9,7 +9,7 @@ const STATUS_LABEL: Record<TripOutput["status"], string> = {
   ready: "Listo",
   in_progress: "En viaje",
   finished: "Terminado",
-  closed: "Cerrado",
+  closed: "Finalizado",
   deleted: "Borrado",
 };
 

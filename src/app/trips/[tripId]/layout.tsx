@@ -13,7 +13,7 @@ const STATUS_LABEL: Record<string, string> = {
   ready: "Listo para viajar",
   in_progress: "En viaje",
   finished: "Terminado",
-  closed: "Cerrado",
+  closed: "Finalizado",
   deleted: "Borrado",
 };
 
