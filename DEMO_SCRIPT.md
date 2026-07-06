@@ -25,3 +25,23 @@ localStorage por navegador), así que el link sólo funciona de verdad si
 se abre en el mismo navegador que ya tiene el viaje cargado — no sirve
 para cruzar dispositivos. Por eso esta parte se cuenta y no se demuestra
 en vivo con un segundo dispositivo real.
+
+## 2. Los chips de "gente frecuente" al crear un viaje
+
+**Cuándo mencionarlo:** al mostrar los chips en "Otros integrantes"
+("Ya viajaste con ellos, ¿los sumás?").
+
+**Qué decir (más o menos):**
+
+> "Junto se acuerda con quién ya viajaste antes y te lo sugiere para no
+> tener que volver a tipear el nombre. Hoy esto funciona mirando tus
+> viajes anteriores guardados en este navegador — en una versión con
+> cuentas reales, esto vendría directamente de tu login o tus contactos,
+> y podría sugerir gente incluso de viajes armados desde otro
+> dispositivo."
+
+**Por qué se dice así:** que quede claro que hoy son nombres reciclados
+de texto (no hay cuentas reales ni gente "logueada" en Junto), pero la
+lógica de producto (sugerir gente frecuente) es la misma que tendría una
+versión con autenticación real — no se está mostrando ni desarrollando
+un sistema de cuentas, sólo se explica hacia dónde escalaría.
