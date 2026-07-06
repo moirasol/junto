@@ -13,7 +13,7 @@ export default function TripsPage() {
     <main className="space-y-6">
       <header className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900">Junto</h1>
+          <h1 className="font-display text-2xl font-bold text-brand-600">Junto</h1>
           <p className="text-sm text-neutral-500">Tus viajes en grupo, sin que todo caiga en uno solo.</p>
         </div>
         <Link href="/trips/new">

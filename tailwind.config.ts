@@ -20,6 +20,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["ui-sans-serif", "system-ui", "sans-serif"],
+        display: ["var(--font-manrope)", "ui-sans-serif", "system-ui", "sans-serif"],
       },
     },
   },
