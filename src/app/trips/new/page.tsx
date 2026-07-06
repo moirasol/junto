@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createTrip } from "@/services/tripService";
 import { getCurrentUserId } from "@/lib/currentUser";
-import { ARGENTINA_DESTINATIONS } from "@/lib/argentinaDestinations";
 import { getFrequentParticipantNames } from "@/lib/frequentParticipants";
 import { Button, Card, FieldLabel, TextInput } from "@/components/ui/Primitives";
 
@@ -92,14 +91,7 @@ export default function NewTripPage() {
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
               placeholder="Córdoba"
-              list="argentina-destinations"
-              autoComplete="off"
             />
-            <datalist id="argentina-destinations">
-              {ARGENTINA_DESTINATIONS.map((city) => (
-                <option key={city} value={city} />
-              ))}
-            </datalist>
           </div>
         </Card>
 
