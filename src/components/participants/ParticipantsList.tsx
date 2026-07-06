@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { UserPlus, Users } from "lucide-react";
+import { Link2, UserPlus, Users } from "lucide-react";
 import type { TripOutput } from "@/domain/trip";
 import { acceptInvitation, inviteParticipants, markParticipantLeft } from "@/services/tripService";
 import { getActingParticipantId, setActingParticipantId } from "@/lib/currentUser";
@@ -27,9 +27,19 @@ export function ParticipantsList({ trip }: { trip: TripOutput }) {
   const [newName, setNewName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [leaveNotice, setLeaveNotice] = useState<string | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
   const [, forceRerender] = useState(0);
 
   const actingParticipantId = getActingParticipantId(trip.id);
+
+  // Simulación del link de invitación (spec nueva): sin backend, sólo
+  // funciona si se abre en el mismo navegador que ya tiene este viaje.
+  function handleCopyInviteLink() {
+    const link = `${window.location.origin}/join/${trip.id}`;
+    navigator.clipboard.writeText(link);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
+  }
 
   function handleAccept(participantId: string, participantName: string, response: "accepted" | "rejected") {
     const result = acceptInvitation({ tripId: trip.id, participantId, response });
@@ -97,9 +107,14 @@ export function ParticipantsList({ trip }: { trip: TripOutput }) {
         <h2 className="flex items-center gap-2 font-semibold text-neutral-900">
           <Users size={18} className="text-brand-600" /> Integrantes
         </h2>
-        <Button type="button" variant="ghost" onClick={() => setAddingOpen((v) => !v)}>
-          <UserPlus size={16} /> Invitar
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="ghost" onClick={handleCopyInviteLink}>
+            <Link2 size={16} /> {linkCopied ? "¡Copiado!" : "Copiar link"}
+          </Button>
+          <Button type="button" variant="ghost" onClick={() => setAddingOpen((v) => !v)}>
+            <UserPlus size={16} /> Invitar
+          </Button>
+        </div>
       </div>
 
       {addingOpen && (
