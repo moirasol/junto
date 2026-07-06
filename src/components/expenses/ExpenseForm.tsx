@@ -7,6 +7,7 @@ import { getActingUserId } from "@/lib/currentUser";
 import { Button, Card, FieldLabel, TextInput } from "@/components/ui/Primitives";
 
 const CURRENCIES = ["ARS", "USD", "EUR"];
+const EXPENSE_CATEGORY_SUGGESTIONS = ["Supermercado", "Nafta", "Cena", "Alojamiento", "Entretenimiento"];
 
 export function ExpenseForm({ trip }: { trip: TripOutput }) {
   const acceptedParticipants = trip.participants.filter((p) => p.status === "accepted");
@@ -22,6 +23,12 @@ export function ExpenseForm({ trip }: { trip: TripOutput }) {
 
   function toggleParticipant(id: string) {
     setParticipantIds((ids) => (ids.includes(id) ? ids.filter((i) => i !== id) : [...ids, id]));
+  }
+
+  const allSelected = participantIds.length === acceptedParticipants.length;
+
+  function toggleAllParticipants() {
+    setParticipantIds(allSelected ? [] : acceptedParticipants.map((p) => p.id));
   }
 
   function submit() {
@@ -74,6 +81,18 @@ export function ExpenseForm({ trip }: { trip: TripOutput }) {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Supermercado"
           />
+          <div className="mt-2 flex flex-wrap gap-2">
+            {EXPENSE_CATEGORY_SUGGESTIONS.map((category) => (
+              <button
+                key={category}
+                type="button"
+                onClick={() => setDescription(category)}
+                className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700 hover:bg-brand-100"
+              >
+                {category}
+              </button>
+            ))}
+          </div>
         </div>
         <div>
           <FieldLabel htmlFor="expense-amount">Monto</FieldLabel>
@@ -105,17 +124,36 @@ export function ExpenseForm({ trip }: { trip: TripOutput }) {
 
       <div>
         <FieldLabel>¿Entre quiénes se divide?</FieldLabel>
-        <div className="flex flex-wrap gap-3">
-          {acceptedParticipants.map((p) => (
-            <label key={p.id} className="flex items-center gap-2 text-sm text-neutral-700">
-              <input
-                type="checkbox"
-                checked={participantIds.includes(p.id)}
-                onChange={() => toggleParticipant(p.id)}
-              />
-              {p.name}
-            </label>
-          ))}
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={toggleAllParticipants}
+            className={
+              allSelected
+                ? "rounded-full bg-brand-600 px-3 py-1 text-sm font-medium text-white"
+                : "rounded-full bg-brand-50 px-3 py-1 text-sm font-medium text-brand-700 hover:bg-brand-100"
+            }
+          >
+            {allSelected ? "✓ " : ""}Todos
+          </button>
+          {acceptedParticipants.map((p) => {
+            const selected = participantIds.includes(p.id);
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => toggleParticipant(p.id)}
+                className={
+                  selected
+                    ? "rounded-full bg-brand-600 px-3 py-1 text-sm font-medium text-white"
+                    : "rounded-full bg-brand-50 px-3 py-1 text-sm font-medium text-brand-700 hover:bg-brand-100"
+                }
+              >
+                {selected ? "✓ " : ""}
+                {p.name}
+              </button>
+            );
+          })}
         </div>
       </div>
 
