@@ -5,6 +5,7 @@ import type { TripOutput } from "@/domain/trip";
 import type { SuggestedTransfer } from "@/domain/settlement";
 import { generateSettlement, adjustSettlement, closeSettlement } from "@/services/settlementService";
 import { getActingUserId } from "@/lib/currentUser";
+import { HandCoins } from "lucide-react";
 import { Badge, Button, Card, EmptyState } from "@/components/ui/Primitives";
 import { SettlementTransferRow } from "./SettlementTransferRow";
 
@@ -34,6 +35,7 @@ export function SettlementProposal({ trip }: { trip: TripOutput }) {
   if (confirmedExpenses.length === 0) {
     return (
       <EmptyState
+        icon={HandCoins}
         title="No hay gastos para liquidar"
         description="Cuando se confirmen gastos del viaje, vas a poder generar la liquidación acá."
       />

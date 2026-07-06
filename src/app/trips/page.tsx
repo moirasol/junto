@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { MapPin, Plus } from "lucide-react";
 import { useTripsList } from "@/lib/hooks";
 import { TripSummaryCard } from "@/components/trips/TripSummaryCard";
 import { Button, EmptyState } from "@/components/ui/Primitives";
@@ -25,6 +25,7 @@ export default function TripsPage() {
 
       {trips.length === 0 ? (
         <EmptyState
+          icon={MapPin}
           title="Todavía no armaste ningún viaje"
           description="Creá uno e invitá a tu grupo para arrancar a coordinar."
         />

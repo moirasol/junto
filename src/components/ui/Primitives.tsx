@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import type { ButtonHTMLAttributes, InputHTMLAttributes, LabelHTMLAttributes, TextareaHTMLAttributes } from "react";
+import type { LucideIcon } from "lucide-react";
 
 export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
@@ -145,9 +146,22 @@ export function AvatarStack({ names, max = 4 }: { names: string[]; max?: number 
   );
 }
 
-export function EmptyState({ title, description }: { title: string; description: string }) {
+export function EmptyState({
+  title,
+  description,
+  icon: Icon,
+}: {
+  title: string;
+  description: string;
+  icon?: LucideIcon;
+}) {
   return (
     <div className="rounded-xl border border-dashed border-neutral-300 bg-neutral-50 p-6 text-center">
+      {Icon && (
+        <span className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-brand-100 text-brand-700">
+          <Icon size={22} />
+        </span>
+      )}
       <p className="font-medium text-neutral-700">{title}</p>
       <p className="mt-1 text-sm text-neutral-500">{description}</p>
     </div>

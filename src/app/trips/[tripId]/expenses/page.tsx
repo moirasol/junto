@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { Wallet } from "lucide-react";
+import { UserCheck, Wallet } from "lucide-react";
 import { useTrip } from "@/lib/hooks";
 import { calculateBalances } from "@/services/expenseService";
 import { ExpenseForm } from "@/components/expenses/ExpenseForm";
@@ -26,6 +26,7 @@ export default function ExpensesPage() {
 
       {acceptedParticipants.length === 0 ? (
         <EmptyState
+          icon={UserCheck}
           title="Todavía no hay nadie confirmado"
           description="Necesitás al menos un integrante que haya aceptado el viaje para cargar gastos."
         />
@@ -35,6 +36,7 @@ export default function ExpensesPage() {
 
       {trip.expenses.length === 0 ? (
         <EmptyState
+          icon={Wallet}
           title="Este viaje todavía no tiene gastos"
           description="Cuando alguien pague algo, cargalo acá para llevar la cuenta entre todos."
         />

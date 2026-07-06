@@ -113,6 +113,7 @@ export default function DecisionsPage() {
 
       {trip.decisions.length === 0 ? (
         <EmptyState
+          icon={ListChecks}
           title="Todavía no hay decisiones"
           description="Creá la primera para empezar a definir fechas, alojamiento o transporte."
         />
