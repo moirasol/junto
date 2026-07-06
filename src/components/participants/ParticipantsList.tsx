@@ -150,7 +150,7 @@ export function ParticipantsList({ trip }: { trip: TripOutput }) {
                     <span className="ml-2 text-xs font-normal text-brand-700">(vos)</span>
                   )}
                   {index === 0 && (
-                    <span className="ml-2 text-xs font-normal text-neutral-400">(organiza)</span>
+                    <span className="ml-2 text-xs font-normal text-neutral-400">(creador)</span>
                   )}
                 </p>
                 {participant.joinedAt && (

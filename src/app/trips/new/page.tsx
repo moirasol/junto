@@ -17,6 +17,7 @@ export default function NewTripPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [destination, setDestination] = useState("");
+  const [yourName, setYourName] = useState("");
   const [participants, setParticipants] = useState<ParticipantRow[]>([emptyRow(), emptyRow()]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -38,6 +39,11 @@ export default function NewTripPage() {
     event.preventDefault();
     setErrorMessage(null);
 
+    if (!yourName.trim()) {
+      setErrorMessage("Ingresá tu nombre para poder identificarte como quien creó el viaje.");
+      return;
+    }
+
     const cleanedParticipants = participants
       .filter((row) => row.name.trim())
       .map((row) => ({
@@ -50,7 +56,9 @@ export default function NewTripPage() {
       name: name.trim(),
       destination: destination.trim(),
       createdByUserId: getCurrentUserId(),
-      participants: cleanedParticipants,
+      // Vos (quien crea el viaje) siempre vas primero en la lista, para que
+      // quede claro quién lo creó (ver etiqueta "creador" en Integrantes).
+      participants: [{ name: yourName.trim() }, ...cleanedParticipants],
     });
 
     if (!result.success) {
@@ -98,8 +106,23 @@ export default function NewTripPage() {
         </Card>
 
         <Card className="space-y-4">
+          <div>
+            <FieldLabel htmlFor="your-name">Tu nombre</FieldLabel>
+            <TextInput
+              id="your-name"
+              value={yourName}
+              onChange={(e) => setYourName(e.target.value)}
+              placeholder="¿Cómo te llamás?"
+            />
+            <p className="mt-1 text-xs text-neutral-500">
+              Vas a quedar identificado como quien creó este viaje.
+            </p>
+          </div>
+        </Card>
+
+        <Card className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-neutral-900">Integrantes</h2>
+            <h2 className="font-semibold text-neutral-900">Otros integrantes</h2>
             <Button type="button" variant="ghost" onClick={addParticipantRow}>
               + Agregar otro
             </Button>
