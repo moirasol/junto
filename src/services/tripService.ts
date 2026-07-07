@@ -149,7 +149,7 @@ export function markParticipantLeft(
   return ok({ affectedDecisionIds, affectedExpenseIds });
 }
 
-const REQUIRED_DECISION_TYPES = ["dates", "accommodation", "transport"] as const;
+export const REQUIRED_DECISION_TYPES = ["dates", "accommodation", "transport"] as const;
 
 // Spec 4.1.5 — marcar el viaje como ready sólo cuando fecha, alojamiento y
 // transporte estén confirmados.
