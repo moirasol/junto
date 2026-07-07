@@ -7,6 +7,7 @@ import { calculateBalances } from "@/services/expenseService";
 import { ExpenseForm } from "@/components/expenses/ExpenseForm";
 import { ExpenseTable } from "@/components/expenses/ExpenseTable";
 import { BalanceSummary } from "@/components/expenses/BalanceSummary";
+import { AICommandInput } from "@/components/ai/AICommandInput";
 import { EmptyState } from "@/components/ui/Primitives";
 
 export default function ExpensesPage() {
@@ -31,7 +32,10 @@ export default function ExpensesPage() {
           description="Necesitás al menos un integrante que haya aceptado el viaje para cargar gastos."
         />
       ) : (
-        <ExpenseForm trip={trip} />
+        <>
+          <ExpenseForm trip={trip} />
+          <AICommandInput trip={trip} />
+        </>
       )}
 
       {trip.expenses.length === 0 ? (
