@@ -49,15 +49,12 @@ export function NextActionPanel({ trip }: { trip: TripOutput }) {
             {resolved.length === 0 ? (
               <p className="text-sm text-neutral-500">Todavía no se confirmó ninguna decisión.</p>
             ) : (
-              <ul className="mt-2 space-y-2">
+              <ul className="mt-2 space-y-1 text-sm text-neutral-600">
                 {resolved.map((decision) => {
                   const selected = decision.options.find((o) => o.id === decision.selectedOptionId);
                   return (
-                    <li key={decision.id} className="flex items-center justify-between gap-2 text-sm text-neutral-600">
-                      <span>
-                        {decision.displayTitle}: {selected?.label ?? "—"}
-                      </span>
-                      <DecisionStatusBadge status={decision.status} />
+                    <li key={decision.id}>
+                      {decision.displayTitle}: {selected?.label ?? "—"}
                     </li>
                   );
                 })}
