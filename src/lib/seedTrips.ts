@@ -57,9 +57,9 @@ export function buildSeedTrips(): TripOutput[] {
 
   const tandilId = generateId("trip");
   const tandilParticipants = [
-    { id: generateId("participant"), name: "Male", status: "accepted" as const, joinedAt: timestamp },
+    { id: generateId("participant"), name: "Moi", status: "accepted" as const, joinedAt: timestamp },
     { id: generateId("participant"), name: "Nico", status: "accepted" as const, joinedAt: timestamp },
-    { id: generateId("participant"), name: "Caro", status: "invited" as const },
+    { id: generateId("participant"), name: "Caro", status: "accepted" as const, joinedAt: timestamp },
   ];
   const tandilAccepted = tandilParticipants.filter((p) => p.status === "accepted").map((p) => p.id);
 
@@ -105,7 +105,7 @@ export function buildSeedTrips(): TripOutput[] {
         {
           ...buildConfirmedDecision(
             "transport",
-            ["Auto de Male (4 lugares)", "Combi alquilada"],
+            ["Auto de Moi (4 lugares)", "Combi alquilada"],
             tandilAccepted,
             timestamp
           ),
