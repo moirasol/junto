@@ -87,7 +87,7 @@ export function buildSeedTrips(): TripOutput[] {
         {
           ...buildConfirmedDecision(
             "dates",
-            ["27 al 30 de septiembre", "4 al 7 de octubre"],
+            ["9 al 12 de julio", "16 al 19 de julio"],
             tandilAccepted,
             timestamp
           ),
