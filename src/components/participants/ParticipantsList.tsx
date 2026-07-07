@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Link2, MessageCircle, UserPlus, Users } from "lucide-react";
+import { Check, Link2, MessageCircle, UserPlus, Users } from "lucide-react";
 import type { TripOutput } from "@/domain/trip";
 import { acceptInvitation, inviteParticipants, markParticipantLeft } from "@/services/tripService";
 import { getActingParticipantId, setActingParticipantId } from "@/lib/currentUser";
@@ -117,11 +117,23 @@ export function ParticipantsList({ trip }: { trip: TripOutput }) {
           <Users size={18} className="text-brand-600" /> Integrantes
         </h2>
         <div className="flex items-center gap-2">
-          <Button type="button" variant="ghost" onClick={handleCopyInviteLink}>
-            <Link2 size={16} /> {linkCopied ? "¡Copiado!" : "Copiar link"}
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={handleCopyInviteLink}
+            aria-label={linkCopied ? "¡Copiado!" : "Copiar link"}
+            title={linkCopied ? "¡Copiado!" : "Copiar link"}
+          >
+            {linkCopied ? <Check size={18} /> : <Link2 size={18} />}
           </Button>
-          <Button type="button" variant="ghost" onClick={() => setAddingOpen((v) => !v)}>
-            <UserPlus size={16} /> Invitar
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => setAddingOpen((v) => !v)}
+            aria-label="Invitar"
+            title="Invitar"
+          >
+            <UserPlus size={18} />
           </Button>
         </div>
       </div>
