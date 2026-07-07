@@ -28,6 +28,29 @@ function buildDatesDecision(acceptedParticipantIds: string[], timestamp: string)
   };
 }
 
+// Misma decisión, pero ya resuelta: todos votaron la primera opción y el
+// grupo la confirmó — para que un viaje "finalizado" no muestre una
+// decisión pendiente adentro.
+function buildConfirmedDatesDecision(acceptedParticipantIds: string[], timestamp: string): DecisionOutput {
+  const decision = buildDatesDecision(acceptedParticipantIds, timestamp);
+  const winningOption = decision.options[0]!;
+  winningOption.voteCount = acceptedParticipantIds.length;
+  winningOption.isTopOption = true;
+  decision.votes = acceptedParticipantIds.map((participantId) => ({
+    participantId,
+    optionId: winningOption.id,
+  }));
+  decision.status = "confirmed";
+  decision.selectedOptionId = winningOption.id;
+  decision.participation = {
+    totalParticipants: acceptedParticipantIds.length,
+    votedParticipants: acceptedParticipantIds.length,
+    missingParticipantIds: [],
+    participationRate: 1,
+  };
+  return decision;
+}
+
 // Datos de demo para que la lista de viajes no arranque vacía en una
 // presentación. Se cargan una sola vez (ver SEEDED_KEY en storage.ts); si
 // se borran los viajes después, no vuelven a aparecer solos.
@@ -74,12 +97,12 @@ export function buildSeedTrips(): TripOutput[] {
       id: rosarioId,
       name: "Escapada a Rosario",
       destination: "Rosario",
-      status: "planning",
+      status: "closed",
       createdByUserId: "user_seed_2",
       participants: rosarioParticipants,
       decisions: [
         {
-          ...buildDatesDecision(
+          ...buildConfirmedDatesDecision(
             rosarioParticipants.filter((p) => p.status === "accepted").map((p) => p.id),
             timestamp
           ),
