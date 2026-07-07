@@ -45,3 +45,19 @@ de texto (no hay cuentas reales ni gente "logueada" en Junto), pero la
 lógica de producto (sugerir gente frecuente) es la misma que tendría una
 versión con autenticación real — no se está mostrando ni desarrollando
 un sistema de cuentas, sólo se explica hacia dónde escalaría.
+
+## 3. El botón "Actuar como"
+
+**Cuándo mencionarlo:** la primera vez que lo uses para cambiar de
+integrante (por ejemplo, antes de votar como una segunda persona).
+
+**Qué decir (más o menos):**
+
+> "Esto simula que cada persona entra con su propia cuenta. Como Junto
+> todavía no tiene login real, uso este selector para probar el viaje
+> desde el punto de vista de cada integrante — en la versión real, cada
+> uno haría login desde su celular y no necesitaría este botón."
+
+**Por qué se dice así:** es un patrón común en prototipos y herramientas
+de QA/admin para simular usuarios sin backend de autenticación. Decirlo
+en voz alta muestra que la limitación es consciente, no un descuido.
