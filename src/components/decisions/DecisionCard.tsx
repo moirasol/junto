@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Sparkles } from "lucide-react";
 import type { DecisionOutput } from "@/domain/decision";
 import type { TripOutput } from "@/domain/trip";
 import { voteDecision, confirmDecision, markDecisionReviewed } from "@/services/decisionService";
@@ -62,7 +63,10 @@ export function DecisionCard({ trip, decision }: { trip: TripOutput; decision: D
 
       {decision.description && <p className="text-sm text-neutral-600">{decision.description}</p>}
       {decision.aiSummary && decision.status !== "confirmed" && (
-        <p className="text-sm italic text-neutral-500">{decision.aiSummary}</p>
+        <p className="flex items-start gap-1.5 text-sm italic text-neutral-500">
+          <Sparkles size={14} className="mt-0.5 shrink-0 text-brand-400" />
+          <span>{decision.aiSummary}</span>
+        </p>
       )}
 
       <div className="space-y-2">
