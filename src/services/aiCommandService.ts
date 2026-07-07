@@ -39,6 +39,16 @@ export type AIActionOutput = {
   actions: AIAction[];
 };
 
+// Modismo argentino común para describir un gasto de supermercado.
+const EXPENSE_DESCRIPTION_SYNONYMS: Record<string, string> = {
+  super: "Supermercado",
+};
+
+function normalizeExpenseDescription(raw: string): string {
+  const key = normalizeText(raw);
+  return EXPENSE_DESCRIPTION_SYNONYMS[key] ?? raw;
+}
+
 // Interpreta montos en formato es-AR: la coma es siempre el separador
 // decimal; un punto sin coma se asume separador de miles cuando agrupa de a
 // 3 dígitos (ej. "45.000"), si no se trata como decimal (ej. "45.5").
@@ -86,7 +96,7 @@ export function parseNaturalLanguageCommand(
         payerName,
         amount: parseAmount(amountRaw!),
         currency: "ARS",
-        description: description!.trim().replace(/,\s*$/, ""),
+        description: normalizeExpenseDescription(description!.trim().replace(/,\s*$/, "")),
         excludedParticipantNames,
       },
     });
